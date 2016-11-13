@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.StringTokenizer;
 
 
@@ -15,10 +16,14 @@ import java.util.StringTokenizer;
 public class RestHandler implements HttpHandler{
     private void responseErr(HttpExchange exchange, int errCode, String title, String target, String info) throws IOException{
         Headers resHeader = exchange.getResponseHeaders();
-        resHeader.set("Content-Type", "text/html");
-        exchange.sendResponseHeaders(404, 0);
+        resHeader.set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(errCode, 0);
         OutputStream resStream = exchange.getResponseBody();
-        resStream.write(("<h1>" + String.valueOf(errCode) + " - " + title + "</h1>" + "#Err : [" + target + "]_" + info).getBytes());
+        resStream.write(("{\n\t" +
+                "\"status\":\"" + String.valueOf(errCode) + "\",\n\t" +
+                "\"message\":\"" + target + "\",\n\t"+
+                "\"info\":" + info +"\"\n\t" +
+                "}").getBytes());
         resStream.close();
     }
 
@@ -30,13 +35,25 @@ public class RestHandler implements HttpHandler{
             try {
                 RestClass restClass =
                         RestClass.getInstance(Class.forName("rest.RestClass_" + tokenizerPath.nextToken()).asSubclass(RestClass.class));
-                restClass.hello();
+                if(restClass.isRoot)
+                        throw new ClassNotFoundException(restClass.getClass().getSimpleName());
+
+                restClass.procRest(tokenizerPath, exchange);
+
             } catch (ClassNotFoundException e) {
-                responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler class not found.");
+                responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler not found.");
             } catch (InstantiationException e) {
                 responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler instantiation fault.");
             } catch (IllegalAccessException e) {
                 responseErr(exchange, 403, "Forbidden", e.getMessage(), "REST handler forbidden.");
+            } catch (NoSuchMethodException e) {
+                responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler not found.");
+            } catch (InvocationTargetException e){
+                responseErr(exchange, 500, "Internal Server Error", e.getMessage(), "REST handler invocation fault.");
+            } catch(RestException e){
+                responseErr(exchange, 400, "Bad Request", e.getMessage(), "REST request fault.");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         else{
