@@ -35,23 +35,23 @@ public class RestHandler implements HttpHandler{
             try {
                 RestClass restClass =
                         RestClass.getInstance(Class.forName("rest.RestClass_" + tokenizerPath.nextToken()).asSubclass(RestClass.class));
-                if(restClass.isRoot)
+                if(!restClass.isRoot)
                         throw new ClassNotFoundException(restClass.getClass().getSimpleName());
 
                 restClass.procRest(tokenizerPath, exchange);
 
-            } catch (ClassNotFoundException e) {
-                responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler not found.");
-            } catch (InstantiationException e) {
-                responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler instantiation fault.");
-            } catch (IllegalAccessException e) {
-                responseErr(exchange, 403, "Forbidden", e.getMessage(), "REST handler forbidden.");
-            } catch (NoSuchMethodException e) {
-                responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler not found.");
-            } catch (InvocationTargetException e){
-                responseErr(exchange, 500, "Internal Server Error", e.getMessage(), "REST handler invocation fault.");
             } catch(RestException e){
-                responseErr(exchange, 400, "Bad Request", e.getMessage(), "REST request fault.");
+                responseErr(exchange, 400, "Bad Request", e.getMessage(), "REST request fault");
+            } catch (ClassNotFoundException e) {
+                responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler not found");
+            } catch (NoSuchMethodException e) {
+                responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler not found");
+            } catch (IllegalAccessException e) {
+                responseErr(exchange, 500, "Internal Server Error", e.getMessage(), "REST handler access fault");
+            } catch (InstantiationException e) {
+                responseErr(exchange, 500, "Internal Server Error", e.getMessage(), "REST handler instantiation fault");
+            } catch (InvocationTargetException e){
+                responseErr(exchange, 500, "Internal Server Error", e.getMessage(), "REST handler invocation fault");
             } catch (Exception e) {
                 e.printStackTrace();
             }

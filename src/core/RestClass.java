@@ -1,4 +1,6 @@
 package core;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.*;
 import com.sun.net.httpserver.Headers;
@@ -20,118 +22,136 @@ public abstract class RestClass {
         return instances.get(cls);
     }
 
-    boolean isRoot = true;
-    private Set<String> branch = new HashSet<String>();
-//    private Map<String, Method> getMethod = new HashMap<String, Method>();
-//    private Map<String, Method> postMethod = new HashMap<String, Method>();
-//    private Map<String, Method> putMethod = new HashMap<String, Method>();
-//    private Map<String, Method> deleteMethod = new HashMap<String, Method>();
+    boolean isRoot = false;
+    private Map<String, Class<? extends RestClass>> branch = new HashMap<String, Class<? extends RestClass>>();
+    private JSONArray jsonArray = new JSONArray();
 
-    protected JSONArray jsonArray = new JSONArray();
-
-    private void getProc(StringTokenizer path, HttpExchange exchange) throws Exception{
-
+    private void responseGet(JSONArray jsonArray, HttpExchange exchange) throws IOException{
+        Headers resHeader = exchange.getResponseHeaders();
+        resHeader.set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, 0);
+        OutputStream resStream = exchange.getResponseBody();
+        resStream.write(jsonArray.toJSONString().getBytes());
+        resStream.close();
     }
-    private void postProc(StringTokenizer path, HttpExchange exchange) throws Exception{
-        if(path.hasMoreElements()){
-            String tmpToken = path.nextToken();
-            if(branch.contains(tmpToken)){
-                accessBranch(tmpToken).procRest(path, exchange);
-            }
-            else(){
-                defaultGetMethod();
-            }
-        }else{
-            return defaultPostMethod();
-        }
+    private void responseSuccess(HttpExchange exchange) throws IOException{
+        Headers resHeader = exchange.getResponseHeaders();
+        resHeader.set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, 0);
+        OutputStream resStream = exchange.getResponseBody();
+        resStream.write(("{\n\t" +
+                "\"status\":\"200\",\n\t" +
+                "\"message\":\"success\",\n\t"+
+                "}").getBytes());
+        resStream.close();
     }
-    private void putProc(StringTokenizer path, HttpExchange exchange) throws Exception{
-
+    private void responseErr(HttpExchange exchange) throws IOException{
+        Headers resHeader = exchange.getResponseHeaders();
+        resHeader.set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(400, 0);
+        OutputStream resStream = exchange.getResponseBody();
+        resStream.write(("{\n\t" +
+                "\"status\":\"400\",\n\t" +
+                "\"message\":\"Bad Request\",\n\t"+
+                "\"info\":REST request fault\"\n\t" +
+                "}").getBytes());
+        resStream.close();
     }
-    private void deleteProc(StringTokenizer path, HttpExchange exchange) throws Exception{
-
-    }
-//    public void setBranch(String expr){
-//        if(getMethod.containsKey(expr) ||
-//                postMethod.containsKey(expr) ||
-//                putMethod.containsKey(expr) ||
-//                deleteMethod.containsKey(expr))
-//            return;
-//
-//        branch.add(expr);
-//    }
-//    public void setGetMethod(String expr, String method, Class<? extends RestClass> target) throws Exception{
-//        if(branch.contains(expr))
-//            return;
-//
-//        Method tmpMethod = target.getMethod(method);
-//        if(tmpMethod.getReturnType().getSimpleName().equals("String"))
-//            getMethod.put(expr, tmpMethod);
-//    }
-//    private String callGetMethod(String expr, Object[] args) throws Exception{
-//        if(getMethod.containsKey(expr)) {
-//            return (String)getMethod.get(expr).invoke(args);
-//        }
-//        else
-//            throw new NoSuchMethodError("UnknownMethod");
-//    }
-//    public void setpostMethod(String expr, String method, Class<? extends RestClass> target) throws Exception{
-//        if(branch.contains(expr))
-//            return;
-//
-//        Method tmpMethod = target.getMethod(method);
-//        if(tmpMethod.getReturnType().getSimpleName().equals("String"))
-//            postMethod.put(expr, tmpMethod);
-//    }
-//    private String callpostMethod(String expr, Object[] args) throws Exception{
-//        if(postMethod.containsKey(expr)) {
-//            return (String)postMethod.get(expr).invoke(args);
-//        }
-//        else
-//            throw new NoSuchMethodError("UnknownMethod");
-//    }
-//    public void setputMethod(String expr, String method, Class<? extends RestClass> target) throws Exception{
-//        if(branch.contains(expr))
-//            return;
-//
-//        Method tmpMethod = target.getMethod(method);
-//        if(tmpMethod.getReturnType().getSimpleName().equals("String"))
-//            putMethod.put(expr, tmpMethod);
-//    }
-//    private String callputMethod(String expr, Object[] args) throws Exception{
-//        if(putMethod.containsKey(expr)) {
-//            return (String)putMethod.get(expr).invoke(args);
-//        }
-//        else
-//            throw new NoSuchMethodError("UnknownMethod");
-//    }
-//    public void setdeleteMethod(String expr, String method, Class<? extends RestClass> target) throws Exception{
-//        if(branch.contains(expr))
-//            return;
-//
-//        Method tmpMethod = target.getMethod(method);
-//        if(tmpMethod.getReturnType().getSimpleName().equals("String"))
-//            deleteMethod.put(expr, tmpMethod);
-//    }
-//    private String calldeleteMethod(String expr, Object[] args) throws Exception{
-//        if(deleteMethod.containsKey(expr)) {
-//            return (String)deleteMethod.get(expr).invoke(args);
-//        }
-//        else
-//            throw new NoSuchMethodError("UnknownMethod");
-//    }
-
-    protected void setRoot() {
-        isRoot = false;
-    }
-    protected RestClass accessBranch(String branchName) throws Exception{
-        if(branch.contains(branchName)){
-            RestClass cls = RestClass.getInstance(Class.forName("rest.RestClass_"+branchName).asSubclass(RestClass.class));
+    private RestClass accessBranch(String branchName) throws Exception{
+        if(branch.containsKey(branchName)){
+            RestClass cls = RestClass.getInstance(branch.get(branchName));
             return cls;
         }
         else{
             throw new ClassNotFoundException("rest.RestClass_" + branchName);
         }
+    }
+
+    private void getProc(StringTokenizer path, HttpExchange exchange) throws Exception{
+        if(path.hasMoreElements()){
+            String tmpToken = path.nextToken();
+            if(branch.containsKey(tmpToken)){
+                accessBranch(tmpToken).procRest(path, exchange);
+            }
+            else{
+                if(defaultGetMethod(jsonArray, tmpToken))
+                    responseGet(jsonArray, exchange);
+                else
+                    responseErr(exchange);
+            }
+        }else{
+            if(defaultGetMethod(jsonArray))
+                responseGet(jsonArray, exchange);
+            else
+                responseErr(exchange);
+        }
+    }
+    private void postProc(StringTokenizer path, HttpExchange exchange) throws Exception{
+        if(path.hasMoreElements()){
+            String tmpToken = path.nextToken();
+            if(branch.containsKey(tmpToken)){
+                accessBranch(tmpToken).procRest(path, exchange);
+            }
+            else{
+                if(defaultPostMethod(tmpToken))
+                    responseSuccess(exchange);
+                else
+                    responseErr(exchange);
+            }
+        }else{
+            if(defaultPostMethod())
+                responseSuccess(exchange);
+            else
+                responseErr(exchange);
+        }
+    }
+    private void putProc(StringTokenizer path, HttpExchange exchange) throws Exception{
+        if(path.hasMoreElements()){
+            String tmpToken = path.nextToken();
+            if(branch.containsKey(tmpToken)){
+                accessBranch(tmpToken).procRest(path, exchange);
+            }
+            else{
+                if(defaultPutMethod(tmpToken))
+                    responseSuccess(exchange);
+                else
+                    responseErr(exchange);
+            }
+        }else{
+            if(defaultPutMethod())
+                responseSuccess(exchange);
+            else
+                responseErr(exchange);
+        }
+    }
+    private void deleteProc(StringTokenizer path, HttpExchange exchange) throws Exception{
+        if(path.hasMoreElements()){
+            String tmpToken = path.nextToken();
+            if(branch.containsKey(tmpToken)){
+                accessBranch(tmpToken).procRest(path, exchange);
+            }
+            else{
+                if(defaultDeleteMethod(tmpToken))
+                    responseSuccess(exchange);
+                else
+                    responseErr(exchange);
+            }
+        }else{
+            if(defaultDeleteMethod())
+                responseSuccess(exchange);
+            else
+                responseErr(exchange);
+        }
+    }
+
+    protected void setRoot() {
+        isRoot = true;
+    }
+    protected void dependOn(String subPath, Class<? extends RestClass> getClass) {
+        if(isRoot)
+            return;
+
+        branch.put(subPath, getClass);
     }
 
     public void procRest(StringTokenizer path, HttpExchange exchange) throws Exception {
@@ -143,18 +163,18 @@ public abstract class RestClass {
                 postProc(path, exchange);
                 return;
             case "PUT":
-                rputProc(path, exchange);
+                putProc(path, exchange);
                 return;
             case "DELETE":
                 deleteProc(path, exchange);
                 return;
             default:
-                throw new RestException("HTTP_REQ_ERR");
+                throw new RestException("HTTP_METHOD_ERR");
         }
     }
 
-    protected abstract boolean defaultGetMethod(HttpExchange);
-    protected abstract boolean defaultGetMethod(String arg);
+    protected abstract boolean defaultGetMethod(JSONArray jsonArray);
+    protected abstract boolean defaultGetMethod(JSONArray jsonArray, String arg);
     protected abstract boolean defaultPostMethod();
     protected abstract boolean defaultPostMethod(String arg);
     protected abstract boolean defaultPutMethod();
