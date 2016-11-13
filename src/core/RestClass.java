@@ -76,8 +76,17 @@ public abstract class RestClass {
                 accessBranch(tmpToken).procRest(path, exchange);
             }
             else{
-                if(defaultGetMethod(jsonObject, tmpToken))
-                    responseGet(jsonObject, exchange);
+                if(defaultGetMethod(jsonObject, tmpToken)){
+                    if(path.hasMoreElements()){
+                        tmpToken = path.nextToken();
+                        if(branch.containsKey(tmpToken)){
+                            accessBranch(tmpToken).procRest(path, exchange);
+                        }
+                    }
+                    else{
+                        responseGet(jsonObject, exchange);
+                    }
+                }
                 else
                     responseErr(exchange);
             }
@@ -95,8 +104,16 @@ public abstract class RestClass {
                 accessBranch(tmpToken).procRest(path, exchange);
             }
             else{
-                if(defaultPostMethod(tmpToken))
-                    responseSuccess(exchange);
+                if(defaultPostMethod(tmpToken)) {
+                    if(path.hasMoreElements()){
+                        tmpToken = path.nextToken();
+                        if(branch.containsKey(tmpToken)){
+                            accessBranch(tmpToken).procRest(path, exchange);
+                        }
+                    }
+                    else
+                        responseSuccess(exchange);
+                }
                 else
                     responseErr(exchange);
             }
@@ -114,8 +131,16 @@ public abstract class RestClass {
                 accessBranch(tmpToken).procRest(path, exchange);
             }
             else{
-                if(defaultPutMethod(tmpToken))
-                    responseSuccess(exchange);
+                if(defaultPutMethod(tmpToken)){
+                    if(path.hasMoreElements()){
+                        tmpToken = path.nextToken();
+                        if(branch.containsKey(tmpToken)){
+                            accessBranch(tmpToken).procRest(path, exchange);
+                        }
+                    }
+                    else
+                        responseSuccess(exchange);
+                }
                 else
                     responseErr(exchange);
             }
@@ -133,8 +158,16 @@ public abstract class RestClass {
                 accessBranch(tmpToken).procRest(path, exchange);
             }
             else{
-                if(defaultDeleteMethod(tmpToken))
-                    responseSuccess(exchange);
+                if(defaultDeleteMethod(tmpToken)){
+                    if(path.hasMoreElements()){
+                        tmpToken = path.nextToken();
+                        if(branch.containsKey(tmpToken)){
+                            accessBranch(tmpToken).procRest(path, exchange);
+                        }
+                    }
+                    else
+                        responseSuccess(exchange);
+                }
                 else
                     responseErr(exchange);
             }
