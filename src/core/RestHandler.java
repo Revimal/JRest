@@ -33,13 +33,7 @@ public class RestHandler implements HttpHandler{
 
         if(tokenizerPath.hasMoreElements()) {
             try {
-                RestClass restClass =
-                        RestClass.getInstance(Class.forName("rest.RestClass_" + tokenizerPath.nextToken()).asSubclass(RestClass.class));
-                if(!restClass.isRoot)
-                        throw new ClassNotFoundException(restClass.getClass().getSimpleName());
-
-                restClass.procRest(tokenizerPath, exchange);
-
+                RestClass.getInstance(RestRoot.class).procRest(tokenizerPath, exchange);
             } catch(RestException e){
                 responseErr(exchange, 400, "Bad Request", e.getMessage(), "REST request fault");
             } catch (ClassNotFoundException e) {
