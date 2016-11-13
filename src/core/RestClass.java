@@ -1,8 +1,8 @@
 package core;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.json.simple.JSONObject;
+
+import java.util.*;
 
 /**
  * Created by HyeonHo on 2016-11-12.
@@ -18,6 +18,18 @@ public abstract class RestClass {
             }
         }
         return instances.get(cls);
+    }
+
+    protected JSONArray jsonArray = new JSONObject();
+    protected Set<String> branches = new HashSet<String>();
+
+    protected RestClass accessBranch(String branchName) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
+        if(branches.contains(branchName)){
+            return RestClass.getInstance(Class.forName("rest.RestClass_"+branchName).asSubclass(RestClass.class));
+        }
+        else{
+            return null;
+        }
     }
 
     public abstract void hello();

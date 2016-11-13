@@ -26,25 +26,26 @@ public class RestHandler implements HttpHandler{
     public void handle(HttpExchange exchange) throws IOException{
         StringTokenizer tokenizerPath = new StringTokenizer(exchange.getRequestURI().getPath(), "/");
 
-        try {
-            RestClass restClass =
-                RestClass.getInstance(Class.forName("rest.RestClass_"+ tokenizerPath.nextToken()).asSubclass(RestClass.class));
-
-            restClass.hello();
-
+        if(tokenizerPath.hasMoreElements()) {
+            try {
+                RestClass restClass =
+                        RestClass.getInstance(Class.forName("rest.RestClass_" + tokenizerPath.nextToken()).asSubclass(RestClass.class));
+                restClass.hello();
+            } catch (ClassNotFoundException e) {
+                responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler class not found.");
+            } catch (InstantiationException e) {
+                responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler instantiation fault.");
+            } catch (IllegalAccessException e) {
+                responseErr(exchange, 403, "Forbidden", e.getMessage(), "REST handler forbidden.");
+            }
+        }
+        else{
             Headers resHeader = exchange.getResponseHeaders();
             resHeader.set("Content-Type", "text/html");
             exchange.sendResponseHeaders(200, 0);
             OutputStream resStream = exchange.getResponseBody();
-            resStream.write("<h1>Success!</h1>".getBytes());
+            resStream.write("<h1>REST Service Running...</h1>".getBytes());
             resStream.close();
-
-        }catch(ClassNotFoundException e){
-            responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler class not found.");
-        }catch(InstantiationException e){
-            responseErr(exchange, 404, "Not Found", e.getMessage(), "REST handler instantiation fault.");
-        }catch(IllegalAccessException e){
-            responseErr(exchange, 403, "Forbidden", e.getMessage(), "REST handler forbidden.");
         }
     }
 }

@@ -5,7 +5,7 @@ package rest;
  */
 public class RestClass_test extends core.RestClass {
     @Override
-    public void hello(){
+    public  hello(){
         System.out.println("Hello, World!");
     }
 }
