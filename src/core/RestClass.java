@@ -82,6 +82,9 @@ public abstract class RestClass {
                         if(branch.containsKey(tmpToken)){
                             accessBranch(tmpToken).procRest(path, exchange);
                         }
+                        else{
+                            responseErr(exchange);
+                        }
                     }
                     else{
                         responseGet(jsonObject, exchange);

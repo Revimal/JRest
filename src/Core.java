@@ -5,8 +5,6 @@
 import core.JRest;
 import rest.hello;
 
-import java.io.IOException;
-
 public class Core {
     public static void main(String args[]) throws Exception{
         hello.init();

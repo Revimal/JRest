@@ -21,7 +21,7 @@ public class hello extends RestClass{
     @Override
     protected boolean defaultGetMethod(JSONObject jsonObject, String arg) {
         jsonObject.put("status", "200");
-        jsonObject.put("message", "Success");
+        jsonObject.put("message", arg);
         return true;
     }
     @Override
