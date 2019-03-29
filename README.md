@@ -1,5 +1,5 @@
 # JRest
-Light-weight REST API library for java
+Light-weight REST API framework for java
 
 ## Usage
 1. Write your own code to /src/rest/. (hello.java is example code, you can remove it)
