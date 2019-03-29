@@ -1,0 +1,10 @@
+<project default="JRest">
+	<target name="JRest">
+		<mkdir dir="bin"/>
+		<javac srcdir="src" destdir="bin">
+			<classpath>
+				<pathelement path="lib/json-simple-1.1.1.jar"/>
+			</classpath>
+		</javac>
+	</target>
+</project>

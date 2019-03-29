@@ -9,3 +9,21 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# IntelliJ & Gradle
+*.iws
+*.iml
+*.ipr
+out/
+build/
+.idea/
+.idea_modules/
+.graddle
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+atlassian-ide-plugin.xml
+
+# Ant binary path
+bin/
