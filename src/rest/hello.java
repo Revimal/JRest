@@ -4,9 +4,6 @@ import core.RestClass;
 import core.RestRoot;
 import org.json.simple.JSONObject;
 
-/**
- * Created by revdev on 16. 11. 13.
- */
 public class hello extends RestClass{
     public static void init() throws Exception{
         RestClass.getInstance(RestRoot.class).dependOn("hello", hello.class);

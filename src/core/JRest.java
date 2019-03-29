@@ -5,10 +5,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
-/**
- * Created by HyeonHo on 2016-09-03.
- */
-
 public class JRest{
     private static InetSocketAddress addr;
     private static HttpServer server;

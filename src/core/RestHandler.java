@@ -9,10 +9,6 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.StringTokenizer;
 
-
-/**
- * Created by HyeonHo on 2016-09-03.
- */
 public class RestHandler implements HttpHandler{
     private void responseErr(HttpExchange exchange, int errCode, String title, String target, String info) throws IOException{
         Headers resHeader = exchange.getResponseHeaders();
@@ -55,7 +51,7 @@ public class RestHandler implements HttpHandler{
             resHeader.set("Content-Type", "text/html");
             exchange.sendResponseHeaders(200, 0);
             OutputStream resStream = exchange.getResponseBody();
-            resStream.write("<h1>REST Service Running...</h1>".getBytes());
+            resStream.write("<h1>JREST Service Running...</h1>".getBytes());
             resStream.close();
         }
     }

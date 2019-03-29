@@ -1,6 +1,4 @@
-/**
- * Created by HyeonHo on 2016-09-03.
- */
+package jrest;
 
 import core.JRest;
 import rest.hello;
@@ -8,7 +6,7 @@ import rest.hello;
 public class Core {
     public static void main(String args[]) throws Exception{
         hello.init();
-        JRest.getInstance().init("/", 9000);
+        JRest.getInstance().init("/", 8080);
         JRest.getInstance().run();
     }
 }

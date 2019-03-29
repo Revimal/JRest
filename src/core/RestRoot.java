@@ -7,9 +7,6 @@ import org.json.simple.JSONObject;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- * Created by revdev on 16. 11. 13.
- */
 public class RestRoot extends RestClass{
     @Override
     void responseErr(HttpExchange exchange) throws IOException {

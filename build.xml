@@ -1,10 +1,17 @@
 <project default="JRest">
 	<target name="JRest">
-		<mkdir dir="bin"/>
-		<javac srcdir="src" destdir="bin">
+		<mkdir dir="class"/>
+		<javac srcdir="src" destdir="class" includeantruntime="false">
 			<classpath>
 				<pathelement path="lib/json-simple-1.1.1.jar"/>
 			</classpath>
 		</javac>
+		<mkdir dir="bin"/>
+		<jar destfile="bin/JRest.jar" basedir="class">
+			<zipgroupfileset dir="lib" includes="json-simple-1.1.1.jar"/>
+			<manifest>
+				<attribute name="Main-Class" value="jrest.Core"/>
+			</manifest>
+		</jar>
 	</target>
 </project>

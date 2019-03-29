@@ -26,4 +26,5 @@ fabric.properties
 atlassian-ide-plugin.xml
 
 # Ant binary path
+class/
 bin/

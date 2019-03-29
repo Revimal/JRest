@@ -6,9 +6,6 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.json.simple.JSONObject;
 
-/**
- * Created by HyeonHo on 2016-11-12.
- */
 public abstract class RestClass {
     private static final Map<Class<? extends RestClass>, RestClass> instances
             = new HashMap<Class<? extends RestClass>, RestClass>();
